@@ -24,6 +24,48 @@ router.get('/login',function(req,res,next) {
   })
 });
 
+router.post('/login',passport.authenticate('local',{failureRedirect:'/users/login',failureFlash:'Invalid username or password'}),function(req,res) {
+  console.log('Authentication successful');
+  req.flash('success ','you are logged in!');
+  res.redirect('/');
+});
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+//passport.deserializeUser(function(id, done) {
+//  User.getUserById(id, function(err, user) {
+//    done(err, user);
+//  });
+//});
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+passport.use(new LocalStrategy(
+    function(username,password,done) {
+      User.getUserByUsername(username,function(err,user) {
+        if(err) throw err;
+        if(!user) {
+          console.log('Unknown User');
+          return done(null,false,{message:'Unknown User'})
+        }
+        User.comparePassword(password,user.password,function(err,isMatch) {
+          if(err) throw err;
+          if(isMatch) {
+            return done(null, user)
+          } else {
+            console.log('Incorrect Password');
+            return done(null,false, {message:'Incorrect password.'})
+          }
+        })
+      })
+    }
+));
+
 
 router.post('/register',function(req,res,next) {
   var realName = req.body.realName;
@@ -91,5 +133,12 @@ router.post('/register',function(req,res,next) {
   res.redirect('/');
 
 });
+
+
+router.get('/logout',function(req,res) {
+  req.logout();
+  req.flash('success','You are now logged out');
+});
+
 
 module.exports = router;
