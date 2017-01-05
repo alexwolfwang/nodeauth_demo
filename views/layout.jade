@@ -22,16 +22,20 @@ html(lang='en')
           a.navbar-brand(href='#') Express Website
         #navbar.collapse.navbar-collapse
           ul.nav.navbar-nav
-            li(class=(title == 'Member' ? 'active':''))
-              a(href='/') Member
-            li(class=(title == 'Register' ? 'active' :''))
-              a(href='/users/register') Register
-            li(class=(title == 'Login' ? 'active' :''))
-              a(href='/users/login') Log In
+            if user
+              li(class=(title == 'Member' ? 'active':''))
+                a(href='/') Member
+            if !user
+              li(class=(title == 'Register' ? 'active' :''))
+                a(href='/users/register') Register
+              li(class=(title == 'Login' ? 'active' :''))
+                a(href='/users/login') Log In
           ul.nav.navbar-nav.navbar-right
-            li
-              a(href='/users/logout') Logout
+            if user
+              li
+                a(href='/users/logout') Logout
     .container
+      !=messages()
       block content
 
     script(src='/javascripts/jquery.js')
